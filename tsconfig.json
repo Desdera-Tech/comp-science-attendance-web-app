@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "target": "ES2023",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -21,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "typeRoots": ["./types", "./node_modules/@types"]
   },
   "include": [
     "next-env.d.ts",

@@ -12,3 +12,53 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id            String        @id @default(uuid())
+  firstName     String
+  middleName    String?
+  lastName      String
+  username      String        @unique
+  password      String
+  role          Role
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  recordEntries RecordEntry[]
+
+  @@map("users")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STUDENT
+}
+
+model Record {
+  id    String @id @default(uuid())
+  title String
+
+  recordLinks   RecordLink[]
+  recordEntries RecordEntry[]
+
+  @@map("records")
+}
+
+model RecordLink {
+  id       String @id @default(uuid())
+  recordId String
+  record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@map("record_links")
+}
+
+model RecordEntry {
+  id       String @id @default(uuid())
+  recordId String
+  userId   String
+
+  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("record_entries")
+}
