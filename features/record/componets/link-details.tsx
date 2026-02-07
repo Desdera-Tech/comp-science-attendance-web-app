@@ -35,9 +35,8 @@ export function LinkDetails({
     if (isCopied) return;
 
     const message = `
-    Please join the record list by going to your portal at
-    ${BASE_URL}/student, and pasting the link below
-    
+    Please join the record list by going to your portal at\n
+    ${BASE_URL}/student, and pasting the link below\n\n
     ${BASE_URL}/student/verify-link/${linkId}
     `;
 
