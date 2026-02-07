@@ -22,6 +22,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   const data: ApiEnvelope<RecordData> = {
     message: "Record added successfully",
     data: {
+      id: record.id,
       title: record.title,
       entries: 0,
       links: 0,

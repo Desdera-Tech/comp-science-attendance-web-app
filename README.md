@@ -1,5 +1,6 @@
-## Portal Features
+## App Features
 
+Added simple rate limiting
 View account information
 Changing color theme
 
