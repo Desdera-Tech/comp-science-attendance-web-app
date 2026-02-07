@@ -34,11 +34,7 @@ export function LinkDetails({
   const handleCopy = async () => {
     if (isCopied) return;
 
-    const message = `
-    Please join the record list by going to your portal at\n
-    ${BASE_URL}/student, and pasting the link below\n\n
-    ${BASE_URL}/student/verify-link/${linkId}
-    `;
+    const message = `Please join the record list by going to your portal at\n${BASE_URL}/student, and pasting the link below\n\n${BASE_URL}/student/verify-link/${linkId}`;
 
     try {
       await navigator.clipboard.writeText(message);
