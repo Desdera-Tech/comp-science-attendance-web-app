@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
 
   // 🔒 Strict routes
   if (pathname.startsWith("/api/auth")) {
-    const { success } = rateLimit(ip, 5, 60_000); // 5/min
+    const { success } = rateLimit(ip, 30, 60_000); // 30/min
     if (!success) {
       return NextResponse.json(
         { error: "Too many auth attempts" },
@@ -38,7 +38,7 @@ export function middleware(req: NextRequest) {
 
   // 🌐 Default for all other API routes
   else {
-    const { success } = rateLimit(ip, 60, 60_000); // 60/min
+    const { success } = rateLimit(ip, 100, 60_000); // 100/min
     if (!success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
