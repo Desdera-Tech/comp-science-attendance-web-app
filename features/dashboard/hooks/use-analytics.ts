@@ -13,7 +13,6 @@ export function useAdminAnalyticsInfo() {
 
       throw new Error(response.message || "Error fetching Analytics info");
     },
-    staleTime: 1000,
   });
 }
 
@@ -29,6 +28,5 @@ export function useStudentAnalyticsInfo(initialData: Analytics) {
       throw new Error(response.message || "Error fetching Analytics info");
     },
     initialData,
-    staleTime: 1000,
   });
 }

@@ -20,7 +20,6 @@ export function useAdmins(q: TableQuery) {
 
       throw new Error(response.message || "Failed to fetch admins");
     },
-    staleTime: 10_000,
   });
 }
 
@@ -47,7 +46,6 @@ export function useAdminInfo(id: string) {
 
       throw new Error(response.message || "Error fetching Admin info");
     },
-    staleTime: 1000,
   });
 }
 

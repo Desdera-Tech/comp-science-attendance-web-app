@@ -25,7 +25,6 @@ export function useRecords(isAdmin: boolean, q: RecordQuery) {
 
       throw new Error(response.message || "Failed to fetch records");
     },
-    staleTime: 10_000,
   });
 }
 
@@ -40,7 +39,6 @@ export function useRecordEntries(id: string, q: RecordEntryQuery) {
 
       throw new Error(response.message || "Failed to fetch record entries");
     },
-    staleTime: 10_000,
   });
 }
 
@@ -55,7 +53,6 @@ export function useRecordLinks(id: string, q: RecordLinkQuery) {
 
       throw new Error(response.message || "Failed to fetch record links");
     },
-    staleTime: 10_000,
   });
 }
 
