@@ -1,6 +1,5 @@
 import { NotFoundComp } from "@/components/not-found";
 import { RecordLinksTable } from "@/features/record/componets/record-links-table";
-import { requireRoleWithRedirect } from "@/lib/auth/require-role";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -10,8 +9,6 @@ export default async function RecordLinksPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
-  await requireRoleWithRedirect(["SUPER_ADMIN", "ADMIN"]);
 
   const record = await prisma.record.findUnique({ where: { id } });
 

@@ -1,10 +1,12 @@
 "use client";
 
+import Branding from "@/components/branding";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -107,6 +109,9 @@ export function GenerateLinkCard({
             </Button>
           )}
         </CardContent>
+        <CardFooter className="px-0">
+          <Branding />
+        </CardFooter>
       </Card>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { RecordsTable } from "@/features/record/componets/records-table";
+import { RecordsTable } from "@/features/record/componets/admin-records-table";
 import { PlusCircleIcon } from "lucide-react";
 import Link from "next/link";
 

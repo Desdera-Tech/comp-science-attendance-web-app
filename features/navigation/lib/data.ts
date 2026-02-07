@@ -9,7 +9,7 @@ import {
   Users2,
 } from "lucide-react";
 
-export const getAdminNavigationData = (role: Role) => {
+export const getAdminNavigationData = (role?: Role) => {
   const NAVIGATION_DATA: NavGroupType[] = [
     {
       dashboard: [
@@ -77,3 +77,24 @@ export const getAdminNavigationData = (role: Role) => {
 
   return NAVIGATION_DATA;
 };
+
+export const STUDENT_NAVIGATION_DATA: NavGroupType[] = [
+  {
+    dashboard: [
+      {
+        title: "Dashboard",
+        icon: LayoutDashboard,
+        url: "/student",
+      },
+    ],
+  },
+  {
+    settings: [
+      {
+        title: "Account",
+        icon: User2,
+        url: "/student/account",
+      },
+    ],
+  },
+];

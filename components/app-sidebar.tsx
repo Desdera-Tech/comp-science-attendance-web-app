@@ -10,7 +10,10 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { getAdminNavigationData } from "@/features/navigation/lib/data";
+import {
+  getAdminNavigationData,
+  STUDENT_NAVIGATION_DATA,
+} from "@/features/navigation/lib/data";
 import { useSession } from "next-auth/react";
 import { NavGroup } from "./nav-group";
 import { SidebarHeaderContent } from "./sidebar-header-content";
@@ -20,9 +23,10 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { isAdmin: boolean }) {
   const { data } = useSession();
-  if (!data) return;
 
-  const navigationData = isAdmin ? getAdminNavigationData(data.user.role) : [];
+  const navigationData = isAdmin
+    ? getAdminNavigationData(data?.user.role)
+    : STUDENT_NAVIGATION_DATA;
 
   return (
     <Sidebar collapsible="icon" {...props}>

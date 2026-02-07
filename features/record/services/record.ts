@@ -26,14 +26,18 @@ function toQueryString(q: RecordQuery) {
   return params.toString();
 }
 
-export async function getRecords(
-  q: RecordQuery,
-): Promise<ApiEnvelope<PageResponse<RecordData>>> {
+export async function getRecords({
+  q,
+  isAdmin,
+}: {
+  q: RecordQuery;
+  isAdmin: boolean;
+}): Promise<ApiEnvelope<PageResponse<RecordData>>> {
   const qs = toQueryString(q);
 
   try {
     const res = await api.get<ApiEnvelope<PageResponse<RecordData>>>(
-      `/api/record/admin?${qs}`,
+      `/api/record/${isAdmin ? "admin" : "student"}?${qs}`,
     );
     return res.data;
   } catch (err) {
@@ -141,6 +145,19 @@ export async function generateRecordLink(
   try {
     const res = await api.post<ApiEnvelope<string>>(
       `/api/record/${id}/links/generate-link`,
+    );
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
+
+export async function verifyRecordLink(
+  id: string,
+): Promise<ApiEnvelope<string>> {
+  try {
+    const res = await api.patch<ApiEnvelope<string>>(
+      `/api/record/verify-link/${id}`,
     );
     return res.data;
   } catch (err) {

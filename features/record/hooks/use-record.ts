@@ -10,14 +10,15 @@ import {
   getRecordEntries,
   getRecordLinks,
   getRecords,
+  verifyRecordLink,
 } from "../services/record";
 import { RecordEntryQuery, RecordLinkQuery, RecordQuery } from "../types";
 
-export function useRecords(q: RecordQuery) {
+export function useRecords(isAdmin: boolean, q: RecordQuery) {
   return useQuery({
     queryKey: ["records", q],
     queryFn: async () => {
-      const response = await getRecords(q);
+      const response = await getRecords({ q, isAdmin });
       if (response.data) {
         return response.data;
       }
@@ -113,6 +114,18 @@ export function useGenerateRecordLink() {
       console.error(error);
       toast.error(
         "An error occurred while generating the link. Please try again.",
+      );
+    },
+  });
+}
+
+export function useVerifyRecordLink() {
+  return useMutation({
+    mutationFn: verifyRecordLink,
+    onError(error) {
+      console.error(error);
+      toast.error(
+        "An error occurred while verifying the link. Please try again.",
       );
     },
   });

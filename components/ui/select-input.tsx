@@ -45,7 +45,7 @@ export function SelectInput({
           onValueChange={onValueChange}
         >
           <SelectTrigger
-            className={cn("cursor-pointer w-full py-0", className)}
+            className={cn("cursor-pointer w-full py-0 min-h-9.5", className)}
           >
             {icon}{" "}
             <SelectValue placeholder={placeholder || "Select an option"} />

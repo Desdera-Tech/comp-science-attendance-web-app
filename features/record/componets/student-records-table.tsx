@@ -5,13 +5,6 @@ import FilterDropdown from "@/components/table/filter-dropdown";
 import TablePagination from "@/components/table/table-pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SelectInput } from "@/components/ui/select-input";
 import { Spinner } from "@/components/ui/spinner";
@@ -35,8 +28,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { EyeIcon, FileText, MoreVertical, RotateCwIcon } from "lucide-react";
-import Link from "next/link";
+import { RotateCwIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRecords } from "../hooks/use-record";
 import { useRecordsTableState } from "../hooks/use-table-state";
@@ -44,53 +36,13 @@ import { RecordData } from "../types";
 
 const columns: ColumnDef<RecordData>[] = [
   { accessorKey: "title", header: "Title" },
-  { accessorKey: "entries", header: "Entries" },
-  { accessorKey: "links", header: "Links" },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: "Entered At",
     cell: ({ row }) => {
       const { createdAt } = row.original;
 
       return formatDate(createdAt, "dd MMMM yyyy, hh:mm:aa");
-    },
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const { id } = row.original;
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreVertical />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <Link href={`/admin/records/${id}`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <EyeIcon /> View record
-                </DropdownMenuItem>
-              </Link>
-              <Link href={`/admin/records/${id}/entries`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <FileText /> View entries
-                </DropdownMenuItem>
-              </Link>
-              <Link href={`/admin/records/${id}/links`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <FileText /> View links
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </>
-      );
     },
   },
 ];
@@ -98,7 +50,7 @@ const columns: ColumnDef<RecordData>[] = [
 export function RecordsTable() {
   const tableState = useRecordsTableState();
 
-  const { data, isPending, isFetching, status, refetch } = useRecords({
+  const { data, isPending, isFetching, status, refetch } = useRecords(false, {
     page: tableState.pageIndex,
     size: tableState.pageSize,
     search: tableState.search,

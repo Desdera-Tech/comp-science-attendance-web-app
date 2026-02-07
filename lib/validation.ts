@@ -50,3 +50,9 @@ export const recordSchema = z.object({
 });
 
 export type RecordFormValues = z.infer<typeof recordSchema>;
+
+export const verifyLinkSchema = z.object({
+  link: requiredString,
+});
+
+export type VerifyLinkFormValues = z.infer<typeof verifyLinkSchema>;

@@ -1,6 +1,5 @@
 import { NotFoundComp } from "@/components/not-found";
 import { EditStudentForm } from "@/features/student/components/edit-student-form";
-import { requireRoleWithRedirect } from "@/lib/auth/require-role";
 import { prisma } from "@/lib/prisma";
 
 export default async function StudentPage({
@@ -9,8 +8,6 @@ export default async function StudentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
-  await requireRoleWithRedirect(["SUPER_ADMIN", "ADMIN"]);
 
   const student = await prisma.user.findUnique({
     where: { id, role: "STUDENT" },

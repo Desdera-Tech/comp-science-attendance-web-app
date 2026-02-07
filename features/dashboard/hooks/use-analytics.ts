@@ -1,3 +1,4 @@
+import { Analytics } from "@/features/student/types";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminAnalytics, getStudentAnalytics } from "../services/analytics";
 
@@ -16,7 +17,7 @@ export function useAdminAnalyticsInfo() {
   });
 }
 
-export function useStudentAnalyticsInfo() {
+export function useStudentAnalyticsInfo(initialData: Analytics) {
   return useQuery({
     queryKey: ["student-analytics-info"],
     queryFn: async () => {
@@ -27,6 +28,7 @@ export function useStudentAnalyticsInfo() {
 
       throw new Error(response.message || "Error fetching Analytics info");
     },
+    initialData,
     staleTime: 1000,
   });
 }
