@@ -17,7 +17,7 @@ export async function requireRoleWithRedirect(roles: Array<Role>) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/login");
+    redirect("/");
   }
 
   if (!roles.includes(session.user.role)) {

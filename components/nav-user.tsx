@@ -89,7 +89,7 @@ export function NavUser() {
               onClick={() =>
                 signOut({
                   redirect: true,
-                  callbackUrl: "/login",
+                  callbackUrl: "/",
                 })
               }
             >

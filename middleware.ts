@@ -12,6 +12,7 @@ export function middleware(req: NextRequest) {
     "anonymous";
 
   const pathname = req.nextUrl.pathname;
+  const isExportRoute = /^\/api\/record\/[^/]+\/export$/.test(pathname);
 
   // 🔒 Strict routes
   if (pathname.startsWith("/api/auth")) {
@@ -25,8 +26,8 @@ export function middleware(req: NextRequest) {
   }
 
   // 📤 Export routes
-  else if (pathname.startsWith("/api/export")) {
-    const { success } = rateLimit(ip, 5, 60_000); // 5/min
+  else if (isExportRoute) {
+    const { success } = rateLimit(ip, 5, 60_000);
     if (!success) {
       return NextResponse.json(
         { error: "Export rate limit exceeded" },

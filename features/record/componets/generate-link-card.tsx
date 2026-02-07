@@ -53,7 +53,7 @@ export function GenerateLinkCard({
 
     const message = `
     Please join the record list by logging into your portal at
-    ${BASE_URL}/login, and going to your dashboard and paste the link below
+    ${BASE_URL}, and going to your dashboard and paste the link below
     
     ${BASE_URL}/student/verify-link/${linkId}
     `;
