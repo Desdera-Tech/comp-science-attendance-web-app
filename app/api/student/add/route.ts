@@ -22,7 +22,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   });
 
   if (existingUser) {
-    throw new ApiError("Student already exists", 409);
+    throw new ApiError("Username already exists", 409);
   }
 
   const hashedPassword = await passwordHash(password);

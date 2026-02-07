@@ -9,7 +9,7 @@ import { passwordHash } from "@/utils/password";
 import { NextResponse } from "next/server";
 
 export const POST = withErrorHandler(async (req: Request) => {
-  if (!(await requireRole(["SUPER_ADMIN", "ADMIN"]))) {
+  if (!(await requireRole(["SUPER_ADMIN"]))) {
     throw new ApiError("Unauthorized", 401);
   }
 
@@ -22,7 +22,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   });
 
   if (existingUser) {
-    throw new ApiError("Admin already exists", 409);
+    throw new ApiError("Username already exists", 409);
   }
 
   const hashedPassword = await passwordHash(password);

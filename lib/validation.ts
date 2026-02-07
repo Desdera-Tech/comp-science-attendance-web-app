@@ -18,6 +18,14 @@ export const addAdminSchema = z.object({
 
 export type AddAdminFormValues = z.infer<typeof addAdminSchema>;
 
+export const editAdminSchema = z.object({
+  firstName: requiredString,
+  lastName: requiredString,
+  username: requiredString,
+});
+
+export type EditAdminFormValues = z.infer<typeof editAdminSchema>;
+
 export const addStudentSchema = z.object({
   firstName: requiredString,
   middleName: requiredString,
@@ -28,8 +36,17 @@ export const addStudentSchema = z.object({
 
 export type AddStudentFormValues = z.infer<typeof addStudentSchema>;
 
-export const addRecordSchema = z.object({
+export const editStudentSchema = z.object({
+  firstName: requiredString,
+  middleName: requiredString,
+  lastName: requiredString,
+  username: requiredString,
+});
+
+export type EditStudentFormValues = z.infer<typeof editStudentSchema>;
+
+export const recordSchema = z.object({
   title: requiredString,
 });
 
-export type AddRecordFormValues = z.infer<typeof addRecordSchema>;
+export type RecordFormValues = z.infer<typeof recordSchema>;

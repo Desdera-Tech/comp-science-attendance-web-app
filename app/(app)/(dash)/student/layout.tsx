@@ -1,14 +1,11 @@
-import { requireRole } from "@/lib/auth/require-role";
-import { redirect } from "next/navigation";
+import { requireRoleWithRedirect } from "@/lib/auth/require-role";
 
 export default async function StudentPagesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (!(await requireRole(["STUDENT"]))) {
-    redirect("/login");
-  }
+  await requireRoleWithRedirect(["STUDENT"]);
 
   return <>{children}</>;
 }

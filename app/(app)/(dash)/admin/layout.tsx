@@ -4,17 +4,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { requireRole } from "@/lib/auth/require-role";
-import { redirect } from "next/navigation";
+import { requireRoleWithRedirect } from "@/lib/auth/require-role";
 
 export default async function AdminPagesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (!(await requireRole(["ADMIN", "SUPER_ADMIN"]))) {
-    redirect("/login");
-  }
+  await requireRoleWithRedirect(["ADMIN", "SUPER_ADMIN"]);
 
   return (
     <SidebarProvider>

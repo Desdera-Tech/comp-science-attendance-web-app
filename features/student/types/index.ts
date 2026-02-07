@@ -4,10 +4,14 @@ export type Student = {
   middleName?: string | null;
   lastName: string;
   username: string;
-  password: string;
   createdAt: Date;
 };
 
 export type Analytics = {
   records: number;
+};
+
+export type StudentsPage = {
+  students: Student[];
+  nextCursor: string | null;
 };

@@ -12,7 +12,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { AddRecordFormValues, addRecordSchema } from "@/lib/validation";
+import { RecordFormValues, recordSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -29,14 +29,14 @@ export function AddRecordForm({
     reset,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<AddRecordFormValues>({
-    resolver: zodResolver(addRecordSchema),
+  } = useForm<RecordFormValues>({
+    resolver: zodResolver(recordSchema),
     defaultValues: {
       title: "",
     },
   });
 
-  const onSubmit = async (data: AddRecordFormValues) => {
+  const onSubmit = async (data: RecordFormValues) => {
     await addRecord(data, {
       onSuccess: async (response) => {
         const { error, message } = response;

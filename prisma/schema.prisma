@@ -14,17 +14,21 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(uuid())
-  firstName     String
-  middleName    String?
-  lastName      String
-  username      String        @unique
-  password      String
-  role          Role
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  recordEntries RecordEntry[]
+  id             String        @id @default(uuid())
+  firstName      String
+  middleName     String?
+  lastName       String
+  username       String        @unique
+  password       String
+  role           Role
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  recordEntries  RecordEntry[]
+  createdRecords Record[]
 
+  @@index([role])
+  @@index([username])
+  @@index([firstName, lastName])
   @@map("users")
 }
 
@@ -35,11 +39,16 @@ enum Role {
 }
 
 model Record {
-  id    String @id @default(uuid())
-  title String
+  id              String @id @default(uuid())
+  title           String
+  createdByUserId String
+  createdByUser   User   @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   recordLinks   RecordLink[]
   recordEntries RecordEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("records")
 }
@@ -48,6 +57,9 @@ model RecordLink {
   id       String @id @default(uuid())
   recordId String
   record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("record_links")
 }
@@ -60,5 +72,9 @@ model RecordEntry {
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
   @@map("record_entries")
 }

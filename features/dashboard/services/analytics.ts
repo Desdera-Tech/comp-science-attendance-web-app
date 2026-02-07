@@ -1,7 +1,7 @@
 import { Analytics as AdminAnalytics } from "@/features/admin/types";
 import { Analytics as StudentAnalytics } from "@/features/student/types";
-import { api } from "@/lib/http/api";
-import { exceptionHandler } from "@/lib/http/exception";
+import { api } from "@/lib/api";
+import { exceptionHandler } from "@/lib/api/exception";
 import { ApiEnvelope } from "@/types/api";
 
 export async function getAdminAnalytics(): Promise<

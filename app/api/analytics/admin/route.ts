@@ -11,7 +11,7 @@ export const GET = withErrorHandler(async () => {
     throw new ApiError("Unauthorized", 401);
   }
 
-  const [admins, students] = await prisma.$transaction([
+  const [admins, students, records] = await prisma.$transaction([
     prisma.user.count({
       where: { OR: [{ role: "SUPER_ADMIN" }, { role: "ADMIN" }] },
     }),
@@ -20,6 +20,7 @@ export const GET = withErrorHandler(async () => {
         role: "STUDENT",
       },
     }),
+    prisma.record.count(),
   ]);
 
   const data: ApiEnvelope<Analytics> = {
@@ -27,7 +28,7 @@ export const GET = withErrorHandler(async () => {
     data: {
       admins,
       students,
-      records: 0,
+      records,
     },
   };
 
