@@ -11,7 +11,7 @@ export default async function AppPagesLayout({
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/");
+    return redirect("/");
   }
 
   return <SessionProvider>{children}</SessionProvider>;

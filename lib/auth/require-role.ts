@@ -16,12 +16,8 @@ export async function requireRole(roles: Array<Role>) {
 export async function requireRoleWithRedirect(roles: Array<Role>) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/");
-  }
-
-  if (!roles.includes(session.user.role)) {
-    redirect("/unauthorized");
+  if (!session || !roles.includes(session.user.role)) {
+    return redirect("/");
   }
 
   return session;

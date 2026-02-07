@@ -11,9 +11,9 @@ export default async function AuthPagesLayout({
 
   if (session) {
     if (session.user.role === "STUDENT") {
-      redirect("/student");
+      return redirect("/student");
     } else {
-      redirect("/admin");
+      return redirect("/admin");
     }
   }
 

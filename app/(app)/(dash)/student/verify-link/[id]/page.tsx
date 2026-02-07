@@ -6,6 +6,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { authOptions } from "@/lib/auth";
+import { requireRoleWithRedirect } from "@/lib/auth/require-role";
 import { prisma } from "@/lib/prisma";
 import { IconCircleCheck, IconCircleX } from "@tabler/icons-react";
 import { getServerSession } from "next-auth";
@@ -16,6 +17,9 @@ export default async function VerifyLinkPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  await requireRoleWithRedirect(["STUDENT"]);
+
   const session = await getServerSession(authOptions);
   const studentId = session?.user.id || "";
 
