@@ -81,6 +81,7 @@ model RecordEntry {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([recordId, userId])
   @@index([userId])
   @@map("record_entries")
 }

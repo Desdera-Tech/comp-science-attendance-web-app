@@ -52,11 +52,15 @@ export default async function VerifyLinkPage({
     );
   }
 
-  await prisma.recordEntry.create({
-    data: {
+  await prisma.recordEntry.upsert({
+    where: {
+      recordId_userId: { recordId: link.recordId, userId: studentId },
+    },
+    create: {
       recordId: link.recordId,
       userId: studentId,
     },
+    update: {},
   });
 
   if (link.type === "ONE_TIME_USE") {
