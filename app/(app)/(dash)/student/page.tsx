@@ -20,7 +20,7 @@ export default async function StudentDashHomePage() {
       <div className="md:col-span-2">
         <VerifyLinkCard />
       </div>
-      <div className="col-span-full">
+      <div className="col-span-full overflow-hidden">
         <RecordsTable />
       </div>
     </div>

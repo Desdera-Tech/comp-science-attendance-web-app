@@ -64,6 +64,7 @@ export const POST = withErrorHandler(
       where: { id: studentId },
       data: {
         firstName,
+        middleName,
         lastName,
         username,
       },
