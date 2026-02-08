@@ -52,15 +52,16 @@ export default async function VerifyLinkPage({
     );
   }
 
-  await prisma.$transaction([
-    prisma.recordLink.delete({ where: { id } }),
-    prisma.recordEntry.create({
-      data: {
-        recordId: link.recordId,
-        userId: studentId,
-      },
-    }),
-  ]);
+  await prisma.recordEntry.create({
+    data: {
+      recordId: link.recordId,
+      userId: studentId,
+    },
+  });
+
+  if (link.type === "ONE_TIME_USE") {
+    await prisma.recordLink.delete({ where: { id } });
+  }
 
   return (
     <div className="flex flex-1 items-start">

@@ -54,14 +54,20 @@ model Record {
 }
 
 model RecordLink {
-  id       String @id @default(uuid())
+  id       String   @id @default(uuid())
   recordId String
-  record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  record   Record   @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  type     LinkType @default(ONE_TIME_USE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("record_links")
+}
+
+enum LinkType {
+  ONE_TIME_USE
+  MULTIPLE_USE
 }
 
 model RecordEntry {

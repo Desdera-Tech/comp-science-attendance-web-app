@@ -23,15 +23,16 @@ export const PATCH = withErrorHandler(
       throw new ApiError("Link is invalid", 400);
     }
 
-    await prisma.$transaction([
-      prisma.recordLink.delete({ where: { id } }),
-      prisma.recordEntry.create({
-        data: {
-          recordId: link.recordId,
-          userId: studentId,
-        },
-      }),
-    ]);
+    await prisma.recordEntry.create({
+      data: {
+        recordId: link.recordId,
+        userId: studentId,
+      },
+    });
+
+    if (link.type === "ONE_TIME_USE") {
+      await prisma.recordLink.delete({ where: { id } });
+    }
 
     const data: ApiEnvelope<string> = {
       message: "Entry added successfully",

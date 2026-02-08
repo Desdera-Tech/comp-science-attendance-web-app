@@ -1,3 +1,4 @@
+import { LinkType } from "@/generated/prisma/enums";
 import { api } from "@/lib/api";
 import { exceptionHandler } from "@/lib/api/exception";
 import { RecordFormValues } from "@/lib/validation";
@@ -139,12 +140,17 @@ export async function deleteRecordEntry({
   }
 }
 
-export async function generateRecordLink(
-  id: string,
-): Promise<ApiEnvelope<string>> {
+export async function generateRecordLink({
+  id,
+  type,
+}: {
+  id: string;
+  type: LinkType;
+}): Promise<ApiEnvelope<string>> {
   try {
     const res = await api.post<ApiEnvelope<string>>(
       `/api/record/${id}/links/generate-link`,
+      { type },
     );
     return res.data;
   } catch (err) {

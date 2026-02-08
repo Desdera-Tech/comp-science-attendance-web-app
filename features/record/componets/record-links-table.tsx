@@ -45,6 +45,7 @@ const columns: ColumnDef<RecordLink>[] = [
       return link;
     },
   },
+  { accessorKey: "type", header: "Type" },
   {
     accessorKey: "createdAt",
     header: "Created At",

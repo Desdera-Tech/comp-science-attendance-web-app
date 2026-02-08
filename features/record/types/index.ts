@@ -1,3 +1,4 @@
+import { LinkType } from "@/generated/prisma/enums";
 import { Order } from "@/types";
 
 export type RecordData = {
@@ -11,6 +12,7 @@ export type RecordData = {
 export type RecordLink = {
   id: string;
   recordId: string;
+  type: LinkType;
   createdAt: Date;
 };
 

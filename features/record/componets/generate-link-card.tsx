@@ -11,6 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SelectInput } from "@/components/ui/select-input";
+import { LinkType } from "@/generated/prisma/enums";
 import { BASE_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ClipboardIcon, RefreshCcw } from "lucide-react";
@@ -31,32 +33,32 @@ export function GenerateLinkCard({
   const [linkId, setLinkId] = useState("");
   const [isCopied, setIsCopied] = useState(false);
 
+  const [linkType, setLinkType] = useState<LinkType>("MULTIPLE_USE");
+
   const onGenerateLink = async () => {
     if (isGenerating) return;
     setLinkId("");
 
-    await generateLink(id, {
-      onSuccess: async (response) => {
-        const { error, message, data } = response;
-        if (error) {
-          toast.error(message);
-        } else {
-          setLinkId(data || "");
-          toast.success(message);
-        }
+    await generateLink(
+      { id, type: linkType },
+      {
+        onSuccess: async (response) => {
+          const { error, message, data } = response;
+          if (error) {
+            toast.error(message);
+          } else {
+            setLinkId(data || "");
+            toast.success(message);
+          }
+        },
       },
-    });
+    );
   };
 
   const handleCopy = async () => {
     if (isCopied) return;
 
-    const message = `
-    Please join the record list by logging into your portal at
-    ${BASE_URL}, and going to your dashboard and paste the link below
-    
-    ${BASE_URL}/student/verify-link/${linkId}
-    `;
+    const message = `Please join the record list by going to your portal at\n${BASE_URL}/student, and pasting the link below\n\n${BASE_URL}/student/verify-link/${linkId}`;
 
     try {
       await navigator.clipboard.writeText(message);
@@ -88,6 +90,18 @@ export function GenerateLinkCard({
               readOnly
             />
           </div>
+          <SelectInput
+            placeholder="Select type"
+            value={linkType}
+            onValueChange={(value) => setLinkType(value as LinkType)}
+            options={[
+              {
+                label: "One Time",
+                value: "ONE_TIME_USE",
+              },
+              { label: "Multiple", value: "MULTIPLE_USE" },
+            ]}
+          />
           <Button
             variant="outline"
             size="icon"

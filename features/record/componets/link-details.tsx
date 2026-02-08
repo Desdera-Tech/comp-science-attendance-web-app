@@ -25,7 +25,7 @@ export function LinkDetails({
 }: React.ComponentProps<"div"> & { link: RecordLink }) {
   const router = useRouter();
 
-  const { id: linkId, recordId } = link;
+  const { id: linkId, recordId, type } = link;
   const [isCopied, setIsCopied] = useState(false);
 
   const { mutateAsync: deleteLink, isPending: isDeleting } =
@@ -79,11 +79,18 @@ export function LinkDetails({
             <Input
               id="link"
               type="text"
-              placeholder="Generate a new link"
+              placeholder="Link"
               value={linkId}
               readOnly
             />
           </div>
+          <Input
+            id="type"
+            type="text"
+            placeholder="Link type"
+            value={type}
+            readOnly
+          />
           <Button
             variant="outline"
             size="icon"
