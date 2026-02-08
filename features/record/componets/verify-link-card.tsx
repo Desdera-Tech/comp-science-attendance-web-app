@@ -107,7 +107,6 @@ export function VerifyLinkCard({
                       value={value}
                       onChange={onChange}
                       onBlur={onBlur}
-                      error={fieldState.error}
                       aria-invalid={fieldState.invalid}
                     />
                   </Field>
