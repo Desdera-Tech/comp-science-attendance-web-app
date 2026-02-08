@@ -1,6 +1,10 @@
 import { api } from "@/lib/api";
 import { exceptionHandler } from "@/lib/api/exception";
-import { AddStudentFormValues, EditStudentFormValues } from "@/lib/validation";
+import {
+  AddStudentFormValues,
+  ChangePasswordFormValues,
+  EditStudentFormValues,
+} from "@/lib/validation";
 import { ApiEnvelope, PageResponse, TableQuery } from "@/types/api";
 import { Student } from "../types";
 
@@ -57,6 +61,21 @@ export async function editStudent({
   try {
     const res = await api.post<ApiEnvelope<Student>>(
       `/api/student/${id}`,
+      data,
+    );
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
+
+export async function changeStudentPassword({
+  id,
+  ...data
+}: ChangePasswordFormValues & { id: string }): Promise<ApiEnvelope<any>> {
+  try {
+    const res = await api.post<ApiEnvelope<any>>(
+      `/api/student/${id}/change-password`,
       data,
     );
     return res.data;

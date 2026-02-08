@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   addStudent,
+  changeStudentPassword,
   deleteStudent,
   editStudent,
   getStudent,
@@ -56,6 +57,18 @@ export function useEditStudent() {
       console.error(error);
       toast.error(
         "An error occurred while updating the student. Please try again.",
+      );
+    },
+  });
+}
+
+export function useChangeStudentPassword() {
+  return useMutation({
+    mutationFn: changeStudentPassword,
+    onError(error) {
+      console.error(error);
+      toast.error(
+        "An error occurred while changing the password. Please try again.",
       );
     },
   });

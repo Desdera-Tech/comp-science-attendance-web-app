@@ -45,6 +45,12 @@ export const editStudentSchema = z.object({
 
 export type EditStudentFormValues = z.infer<typeof editStudentSchema>;
 
+export const changePasswordSchema = z.object({
+  password: requiredString,
+});
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
+
 export const recordSchema = z.object({
   title: requiredString,
 });
