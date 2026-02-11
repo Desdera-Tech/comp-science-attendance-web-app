@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   addRecord,
+  addRecordEntry,
   deleteRecord,
   deleteRecordEntry,
   deleteRecordLink,
@@ -87,6 +88,18 @@ export function useDeleteRecord() {
       console.error(error);
       toast.error(
         "An error occurred while removing the record. Please try again.",
+      );
+    },
+  });
+}
+
+export function useAddRecordEntry() {
+  return useMutation({
+    mutationFn: addRecordEntry,
+    onError(error) {
+      console.error(error);
+      toast.error(
+        "An error occurred while adding the record entry. Please try again.",
       );
     },
   });

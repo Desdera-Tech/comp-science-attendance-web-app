@@ -1,4 +1,5 @@
 import { NotFoundComp } from "@/components/not-found";
+import { AddRecordEntryForm } from "@/features/record/componets/add-entry-form";
 import { EditRecordForm } from "@/features/record/componets/edit-record-form";
 import { GenerateLinkCard } from "@/features/record/componets/generate-link-card";
 import { RecordData } from "@/features/record/types";
@@ -46,6 +47,9 @@ export default async function RecordPage({
       </div>
       <div className="lg:col-span-2">
         <GenerateLinkCard record={data} />
+      </div>
+      <div className="lg:col-span-1">
+        <AddRecordEntryForm recordId={data.id} />
       </div>
     </div>
   );

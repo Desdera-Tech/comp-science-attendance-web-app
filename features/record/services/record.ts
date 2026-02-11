@@ -1,7 +1,7 @@
 import { LinkType } from "@/generated/prisma/enums";
 import { api } from "@/lib/api";
 import { exceptionHandler } from "@/lib/api/exception";
-import { RecordFormValues } from "@/lib/validation";
+import { AddRecordEntryFormValues, RecordFormValues } from "@/lib/validation";
 import { ApiEnvelope, PageResponse } from "@/types/api";
 import {
   RecordData,
@@ -117,6 +117,23 @@ export async function editRecord({
 export async function deleteRecord(id: string): Promise<ApiEnvelope<any>> {
   try {
     const res = await api.delete<ApiEnvelope<any>>(`/api/record/${id}`);
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
+
+export async function addRecordEntry({
+  id,
+  ...data
+}: AddRecordEntryFormValues & { id: string }): Promise<
+  ApiEnvelope<RecordData>
+> {
+  try {
+    const res = await api.post<ApiEnvelope<RecordData>>(
+      `/api/record/${id}/entries/add`,
+      data,
+    );
     return res.data;
   } catch (err) {
     return exceptionHandler(err);

@@ -57,6 +57,12 @@ export const recordSchema = z.object({
 
 export type RecordFormValues = z.infer<typeof recordSchema>;
 
+export const addRecordEntrySchema = z.object({
+  matricNo: requiredString,
+});
+
+export type AddRecordEntryFormValues = z.infer<typeof addRecordEntrySchema>;
+
 export const verifyLinkSchema = z.object({
   link: requiredString,
 });
