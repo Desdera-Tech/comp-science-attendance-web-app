@@ -68,7 +68,7 @@ export function VerifyLinkCard({
           reset();
           toast.success(message);
 
-          router.push(`/student/record/${recordId}`);
+          router.push(`/student/records/${recordId}`);
         }
       },
     });

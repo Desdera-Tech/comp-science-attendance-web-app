@@ -65,6 +65,20 @@ export const getAdminNavigationData = (role?: Role) => {
       ],
     },
     {
+      nominations: [
+        {
+          title: "Nominations",
+          icon: Users2,
+          url: "/admin/nominations",
+        },
+        {
+          title: "Create Nomination",
+          icon: PlusCircle,
+          url: "/admin/nominations/add",
+        },
+      ],
+    },
+    {
       settings: [
         {
           title: "Account",
@@ -85,6 +99,16 @@ export const STUDENT_NAVIGATION_DATA: NavGroupType[] = [
         title: "Dashboard",
         icon: LayoutDashboard,
         url: "/student",
+      },
+      {
+        title: "Records",
+        icon: Logs,
+        url: "/student/records",
+      },
+      {
+        title: "Nominations",
+        icon: Users2,
+        url: "/student/nominations",
       },
     ],
   },

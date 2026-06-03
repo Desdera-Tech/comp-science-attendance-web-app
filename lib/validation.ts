@@ -68,3 +68,10 @@ export const verifyLinkSchema = z.object({
 });
 
 export type VerifyLinkFormValues = z.infer<typeof verifyLinkSchema>;
+
+export const nominationListSchema = z.object({
+  title: requiredString,
+  description: z.string(),
+});
+
+export type NominationListFormValues = z.infer<typeof nominationListSchema>;

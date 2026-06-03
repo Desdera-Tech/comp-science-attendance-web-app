@@ -6,18 +6,34 @@ import { AnalyticCard, AnalyticCardSkeleton } from "./analytic-card";
 
 export function StudentAnalytics({
   initialRecords,
+  initialNominations,
 }: {
   initialRecords: number;
+  initialNominations: number;
 }) {
   const { data, isPending } = useStudentAnalyticsInfo({
     records: initialRecords,
+    nominations: initialNominations,
   });
 
   if (isPending) {
-    return <AnalyticCardSkeleton />;
+    return (
+      <div className="space-y-4">
+        <AnalyticCardSkeleton />
+        <AnalyticCardSkeleton />
+      </div>
+    );
   }
 
   const records = formatWholeNumber(data?.records || 0);
 
-  return <AnalyticCard title="Records" value={records} />;
+  return (
+    <div className="space-y-4">
+      <AnalyticCard title="Total Records" value={records} />
+      <AnalyticCard
+        title="Total Nominations"
+        value={formatWholeNumber(data?.nominations || 0)}
+      />
+    </div>
+  );
 }

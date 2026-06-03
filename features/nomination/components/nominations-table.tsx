@@ -1,0 +1,489 @@
+"use client";
+
+import { DateRange } from "@/components/date-range";
+import FilterDropdown from "@/components/table/filter-dropdown";
+import TablePagination from "@/components/table/table-pagination";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { SelectInput } from "@/components/ui/select-input";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { DATE_RANGE_OPTIONS } from "@/lib/data";
+import { useDebouncedValue } from "@/lib/debounce";
+import { cn } from "@/lib/utils";
+import { DateRangeType, Order, RangeValue } from "@/types";
+import { IconCircleXFilled } from "@tabler/icons-react";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { formatDate } from "date-fns";
+import { MoreVertical, RotateCwIcon, Trash2Icon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import {
+  useDeleteNomination,
+  useNominations,
+  useStudentNominations,
+} from "../hooks/use-nomination";
+import { useNominationsTableState } from "../hooks/use-table-state";
+import { NominatedByData, NominationData } from "../types";
+
+const adminColumns: ColumnDef<NominationData>[] = [
+  { accessorKey: "nomineeName", header: "Name" },
+  { accessorKey: "nominations", header: "Nominations" },
+];
+
+export function AdminNominationsTable({ id }: { id: string }) {
+  const tableState = useNominationsTableState();
+
+  const { data, isPending, isFetching, status, refetch } = useNominations(id, {
+    page: tableState.pageIndex,
+    size: tableState.pageSize,
+    search: tableState.search,
+    order: tableState.order,
+    from: tableState.dateRange?.from?.toISOString(),
+    to: tableState.dateRange?.to?.toISOString(),
+  });
+
+  const total = data?.total || 0;
+  const pageCount = data?.totalPages || 0;
+  const rows = data?.items || [];
+
+  const table = useReactTable({
+    data: rows,
+    columns: adminColumns as ColumnDef<unknown, unknown>[],
+
+    // IMPORTANT: manual because server-side
+    manualPagination: true,
+    pageCount,
+
+    manualSorting: true,
+
+    // You can also set manualFiltering: true, (even if not using column filters)
+    manualFiltering: true,
+
+    state: {
+      sorting: tableState.sorting,
+      pagination: {
+        pageIndex: tableState.pageIndex,
+        pageSize: tableState.pageSize,
+      },
+    },
+
+    onSortingChange: tableState.setSorting,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater({
+              pageIndex: tableState.pageIndex,
+              pageSize: tableState.pageSize,
+            })
+          : updater;
+
+      tableState.setPageIndex(next.pageIndex);
+      tableState.setPageSize(next.pageSize);
+    },
+
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Toolbar
+        search={tableState.search}
+        setSearch={tableState.setSearch}
+        order={tableState.order}
+        setOrder={tableState.setOrder}
+        rangeValue={tableState.rangeValue}
+        setRangeValue={tableState.setRangeValue}
+        dateRange={tableState.dateRange}
+        setDateRange={tableState.setDateRange}
+        rangeOpen={tableState.rangeOpen}
+        setRangeOpen={tableState.setRangeOpen}
+        handleRangeChange={tableState.handleRangeChange}
+        isFetching={isFetching}
+        refetch={refetch}
+      />
+
+      <div className="rounded-md bg-surface border overflow-x-hidden">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((hg) => (
+              <TableRow key={hg.id}>
+                {hg.headers.map((h) => (
+                  <TableHead key={h.id} className="p-3">
+                    {h.isPlaceholder
+                      ? null
+                      : flexRender(h.column.columnDef.header, h.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {isPending ? (
+              <TableRow>
+                <TableCell
+                  colSpan={adminColumns.length}
+                  className="py-5 justify-center"
+                >
+                  <Spinner className="size-6 mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((r) => (
+                <TableRow key={r.id}>
+                  {r.getVisibleCells().map((c) => (
+                    <TableCell key={c.id} className="p-3">
+                      {flexRender(c.column.columnDef.cell, c.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={adminColumns.length}
+                  className="py-5 text-center text-sm"
+                >
+                  {status === "error" && (
+                    <div className="text-destructive">
+                      An error occurred while fetching nominations.
+                    </div>
+                  )}
+                  {status === "success" && <div>No nominations found.</div>}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <TablePagination table={table} totalResults={total} />
+    </div>
+  );
+}
+
+export function StudentNominationsTable() {
+  const tableState = useNominationsTableState();
+
+  const { data, isPending, isFetching, status, refetch } =
+    useStudentNominations({
+      page: tableState.pageIndex,
+      size: tableState.pageSize,
+      search: tableState.search,
+      order: tableState.order,
+      from: tableState.dateRange?.from?.toISOString(),
+      to: tableState.dateRange?.to?.toISOString(),
+    });
+
+  const total = data?.total || 0;
+  const pageCount = data?.totalPages || 0;
+  const rows = data?.items || [];
+
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const { mutateAsync: deleteNomination } = useDeleteNomination();
+
+  const studentColumns = useMemo<ColumnDef<NominatedByData>[]>(
+    () => [
+      { accessorKey: "nominationListTitle", header: "Title" },
+      { accessorKey: "nomineeName", header: "Name" },
+      {
+        accessorKey: "createdAt",
+        header: "Entered At",
+        cell: ({ row }) => {
+          const { createdAt } = row.original;
+
+          return formatDate(createdAt, "dd MMMM yyyy, hh:mm:aa");
+        },
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          const { nominationListId, nomineeId } = row.original;
+
+          return (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuItem
+                    className="text-destructive cursor-pointer"
+                    onClick={async () => {
+                      setLoadingId(nomineeId);
+                      try {
+                        await deleteNomination(
+                          {
+                            listId: nominationListId,
+                            userId: nomineeId,
+                          },
+                          {
+                            onSuccess: async (response) => {
+                              const { error, message } = response;
+                              if (error) {
+                                toast.error(message);
+                              } else {
+                                toast.success(message);
+                              }
+                            },
+                          },
+                        );
+                      } finally {
+                        setLoadingId(null);
+                      }
+                    }}
+                    disabled={loadingId === nomineeId}
+                  >
+                    <Trash2Icon className="text-destructive" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          );
+        },
+      },
+    ],
+    [deleteNomination, loadingId],
+  );
+
+  const table = useReactTable({
+    data: rows,
+    columns: studentColumns as ColumnDef<unknown, unknown>[],
+
+    // IMPORTANT: manual because server-side
+    manualPagination: true,
+    pageCount,
+
+    manualSorting: true,
+
+    // You can also set manualFiltering: true, (even if not using column filters)
+    manualFiltering: true,
+
+    state: {
+      sorting: tableState.sorting,
+      pagination: {
+        pageIndex: tableState.pageIndex,
+        pageSize: tableState.pageSize,
+      },
+    },
+
+    onSortingChange: tableState.setSorting,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater({
+              pageIndex: tableState.pageIndex,
+              pageSize: tableState.pageSize,
+            })
+          : updater;
+
+      tableState.setPageIndex(next.pageIndex);
+      tableState.setPageSize(next.pageSize);
+    },
+
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Toolbar
+        placeholder="Search by Name or Nomination List"
+        search={tableState.search}
+        setSearch={tableState.setSearch}
+        order={tableState.order}
+        setOrder={tableState.setOrder}
+        rangeValue={tableState.rangeValue}
+        setRangeValue={tableState.setRangeValue}
+        dateRange={tableState.dateRange}
+        setDateRange={tableState.setDateRange}
+        rangeOpen={tableState.rangeOpen}
+        setRangeOpen={tableState.setRangeOpen}
+        handleRangeChange={tableState.handleRangeChange}
+        isFetching={isFetching}
+        refetch={refetch}
+      />
+
+      <div className="rounded-md bg-surface border overflow-x-hidden">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((hg) => (
+              <TableRow key={hg.id}>
+                {hg.headers.map((h) => (
+                  <TableHead key={h.id} className="p-3">
+                    {h.isPlaceholder
+                      ? null
+                      : flexRender(h.column.columnDef.header, h.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {isPending ? (
+              <TableRow>
+                <TableCell
+                  colSpan={studentColumns.length}
+                  className="py-5 justify-center"
+                >
+                  <Spinner className="size-6 mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((r) => (
+                <TableRow key={r.id}>
+                  {r.getVisibleCells().map((c) => (
+                    <TableCell key={c.id} className="p-3">
+                      {flexRender(c.column.columnDef.cell, c.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={studentColumns.length}
+                  className="py-5 text-center text-sm"
+                >
+                  {status === "error" && (
+                    <div className="text-destructive">
+                      An error occurred while fetching nominations.
+                    </div>
+                  )}
+                  {status === "success" && <div>No nominations found.</div>}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <TablePagination table={table} totalResults={total} />
+    </div>
+  );
+}
+
+function Toolbar(props: {
+  placeholder?: string;
+
+  search: string;
+  setSearch: (v: string) => void;
+
+  order: Order;
+  setOrder: (v: Order) => void;
+
+  rangeValue: RangeValue;
+  setRangeValue: (v: RangeValue) => void;
+
+  dateRange?: DateRangeType;
+  setDateRange: (v: DateRangeType | undefined) => void;
+
+  rangeOpen: boolean;
+  setRangeOpen: (v: boolean) => void;
+
+  handleRangeChange: (v: string) => void;
+
+  isFetching: boolean;
+  refetch: () => void;
+}) {
+  const {
+    placeholder = "Search by Name",
+    setSearch,
+    order,
+    setOrder,
+    rangeValue,
+    setRangeValue,
+    dateRange,
+    setDateRange,
+    rangeOpen,
+    setRangeOpen,
+    handleRangeChange,
+    isFetching,
+    refetch,
+  } = props;
+
+  const [searchValue, setSearchValue] = useState("");
+  const searchDebounced = useDebouncedValue(searchValue);
+
+  useEffect(() => setSearch(searchDebounced), [searchDebounced, setSearch]);
+
+  return (
+    <div className="space-y-2">
+      <Card className="py-4">
+        <CardContent className="flex items-end justify-between px-4">
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <Input
+              className="h-9.5"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder={placeholder}
+            />
+
+            <SelectInput
+              className="bg-accent h-9.5"
+              placeholder="Select a Range"
+              value={rangeValue}
+              onValueChange={handleRangeChange}
+              options={DATE_RANGE_OPTIONS}
+            />
+
+            {rangeValue === "custom_range" && (
+              <div className="flex items-center gap-0.5">
+                <DateRange
+                  open={rangeOpen}
+                  setOpen={setRangeOpen}
+                  dateRange={{ from: dateRange?.from, to: dateRange?.to }}
+                  setDateRange={setDateRange}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setDateRange(undefined);
+                    setRangeOpen(false);
+                    setRangeValue("all_time");
+                  }}
+                >
+                  <IconCircleXFilled className="size-5" />
+                </Button>
+              </div>
+            )}
+            <FilterDropdown order={order} setOrder={setOrder} />
+            <Button type="button" variant="ghost" size="icon" onClick={refetch}>
+              <RotateCwIcon
+                className={cn("size-5", { "animate-spin": isFetching })}
+              />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
