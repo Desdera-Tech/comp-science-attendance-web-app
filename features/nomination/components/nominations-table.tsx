@@ -237,6 +237,7 @@ export function StudentNominationsTable() {
                     className="text-destructive cursor-pointer"
                     onClick={async () => {
                       setLoadingId(nomineeId);
+                      toast.warning("Please wait...");
                       try {
                         await deleteNomination(
                           {
