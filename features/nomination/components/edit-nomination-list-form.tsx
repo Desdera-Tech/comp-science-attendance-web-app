@@ -30,7 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "date-fns";
 import { Trash2Icon } from "lucide-react";
 import Link from "next/link";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,6 +45,7 @@ export default function EditNominationListForm({
   list: NominationListData;
 }) {
   const { id, title, description, nominations, createdAt } = list;
+  const router = useRouter();
 
   const { control } = useForm<NominationListFormValues>({
     resolver: zodResolver(nominationListSchema),
@@ -66,8 +67,8 @@ export default function EditNominationListForm({
         if (error) {
           toast.error(message);
         } else {
-          router.push("/admin/nominations");
           toast.success(message);
+          router.push("/admin/nominations");
         }
       },
     });
