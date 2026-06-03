@@ -15,14 +15,20 @@ export const GET = withErrorHandler(async () => {
 
   const session = await getServerSession(authOptions);
 
-  const records = await prisma.record.count({
-    where: { recordEntries: { some: { userId: session?.user.id } } },
-  });
+  const [records, nominations] = await prisma.$transaction([
+    prisma.record.count({
+      where: { recordEntries: { some: { userId: session?.user.id } } },
+    }),
+    prisma.nomination.count({
+      where: { nominatedById: session?.user.id },
+    }),
+  ]);
 
   const data: ApiEnvelope<Analytics> = {
     message: "Analytics fetched successfully",
     data: {
       records,
+      nominations,
     },
   };
 

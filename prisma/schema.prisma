@@ -14,17 +14,23 @@ datasource db {
 }
 
 model User {
-  id             String        @id @default(uuid())
-  firstName      String
-  middleName     String?
-  lastName       String
-  username       String        @unique
-  password       String
-  role           Role
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id         String  @id @default(uuid())
+  firstName  String
+  middleName String?
+  lastName   String
+  username   String  @unique
+  password   String
+  role       Role
+
   recordEntries  RecordEntry[]
   createdRecords Record[]
+
+  createdNominationLists NominationList[]
+  nominationsReceived    Nomination[]     @relation("UserNominationsReceived")
+  nominationsMade        Nomination[]     @relation("UserNominationsMade")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([role])
   @@index([username])
@@ -84,4 +90,44 @@ model RecordEntry {
   @@unique([recordId, userId])
   @@index([userId])
   @@map("record_entries")
+}
+
+model NominationList {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+
+  createdByUserId String
+  createdBy       User   @relation(fields: [createdByUserId], references: [id])
+
+  nominations Nomination[]
+
+  startsAt DateTime?
+  endsAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("nomination_lists")
+}
+
+model Nomination {
+  id String @id @default(uuid())
+
+  nominationListId String
+  nomineeId        String
+  nominatedById    String
+
+  nominationList NominationList @relation(fields: [nominationListId], references: [id], onDelete: Cascade)
+
+  nominee     User @relation("UserNominationsReceived", fields: [nomineeId], references: [id], onDelete: Cascade)
+  nominatedBy User @relation("UserNominationsMade", fields: [nominatedById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([nominationListId, nominatedById])
+  @@unique([nominationListId, nominatedById, nomineeId])
+  @@index([nomineeId])
+  @@index([nominatedById])
+  @@map("nominations")
 }

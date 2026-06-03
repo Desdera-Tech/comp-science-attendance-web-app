@@ -9,6 +9,7 @@ export type Student = {
 
 export type Analytics = {
   records: number;
+  nominations: number;
 };
 
 export type StudentsPage = {
