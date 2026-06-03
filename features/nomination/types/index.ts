@@ -28,6 +28,7 @@ export type NominationData = {
 export type NominatedByData = {
   id: string;
   nominationListId: string;
+  nominationListTitle: string;
   nomineeId: string;
   nomineeName: string;
   nominatedById: string;

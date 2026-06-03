@@ -1,4 +1,4 @@
-import { NominationData } from "@/features/nomination/types";
+import { NominatedByData } from "@/features/nomination/types";
 import { getPaginationParams } from "@/lib/api/pagination";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/auth/require-role";
@@ -68,6 +68,12 @@ export const GET = withErrorHandler(async (req) => {
             },
           },
         },
+        nominatedBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     }),
     prisma.nomination.count({
@@ -92,13 +98,14 @@ export const GET = withErrorHandler(async (req) => {
     }),
   ]);
 
-  const data: ApiEnvelope<PageResponse<NominationData>> = {
+  const data: ApiEnvelope<PageResponse<NominatedByData>> = {
     message: "Nominations fetched successfully",
     data: {
       items: nominations.map((nomination) => ({
         ...nomination,
         nominationListTitle: nomination.nominationList.title,
         nomineeName: `${nomination.nominee.firstName} ${nomination.nominee.lastName}`,
+        nominatedByName: `${nomination.nominatedBy.firstName} ${nomination.nominatedBy.lastName}`,
         nominations: nomination.nominee._count.nominationsReceived,
       })),
       page,

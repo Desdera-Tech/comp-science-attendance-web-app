@@ -98,7 +98,7 @@ model NominationList {
   description String?
 
   createdByUserId String
-  createdBy       User   @relation(fields: [createdByUserId], references: [id])
+  createdBy       User   @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   nominations Nomination[]
 

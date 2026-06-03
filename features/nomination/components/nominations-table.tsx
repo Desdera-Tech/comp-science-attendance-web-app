@@ -27,18 +27,33 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { formatDate } from "date-fns";
 import { RotateCwIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNominations } from "../hooks/use-nomination";
+import { useNominations, useStudentNominations } from "../hooks/use-nomination";
 import { useNominationsTableState } from "../hooks/use-table-state";
-import { NominationData } from "../types";
+import { NominatedByData, NominationData } from "../types";
 
-const columns: ColumnDef<NominationData>[] = [
+const adminColumns: ColumnDef<NominationData>[] = [
   { accessorKey: "nomineeName", header: "Name" },
   { accessorKey: "nominations", header: "Nominations" },
 ];
 
-export function NominationsTable({ id }: { id: string }) {
+const studentColumns: ColumnDef<NominatedByData>[] = [
+  { accessorKey: "nominationListTitle", header: "Title" },
+  { accessorKey: "nomineeName", header: "Name" },
+  {
+    accessorKey: "createdAt",
+    header: "Entered At",
+    cell: ({ row }) => {
+      const { createdAt } = row.original;
+
+      return formatDate(createdAt, "dd MMMM yyyy, hh:mm:aa");
+    },
+  },
+];
+
+export function AdminNominationsTable({ id }: { id: string }) {
   const tableState = useNominationsTableState();
 
   const { data, isPending, isFetching, status, refetch } = useNominations(id, {
@@ -56,7 +71,7 @@ export function NominationsTable({ id }: { id: string }) {
 
   const table = useReactTable({
     data: rows,
-    columns: columns as ColumnDef<unknown, unknown>[],
+    columns: adminColumns as ColumnDef<unknown, unknown>[],
 
     // IMPORTANT: manual because server-side
     manualPagination: true,
@@ -130,7 +145,7 @@ export function NominationsTable({ id }: { id: string }) {
             {isPending ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={adminColumns.length}
                   className="py-5 justify-center"
                 >
                   <Spinner className="size-6 mx-auto" />
@@ -149,7 +164,141 @@ export function NominationsTable({ id }: { id: string }) {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={adminColumns.length}
+                  className="py-5 text-center text-sm"
+                >
+                  {status === "error" && (
+                    <div className="text-destructive">
+                      An error occurred while fetching nominations.
+                    </div>
+                  )}
+                  {status === "success" && <div>No nominations found.</div>}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <TablePagination table={table} totalResults={total} />
+    </div>
+  );
+}
+
+export function StudentNominationsTable() {
+  const tableState = useNominationsTableState();
+
+  const { data, isPending, isFetching, status, refetch } =
+    useStudentNominations({
+      page: tableState.pageIndex,
+      size: tableState.pageSize,
+      search: tableState.search,
+      order: tableState.order,
+      from: tableState.dateRange?.from?.toISOString(),
+      to: tableState.dateRange?.to?.toISOString(),
+    });
+
+  const total = data?.total || 0;
+  const pageCount = data?.totalPages || 0;
+  const rows = data?.items || [];
+
+  const table = useReactTable({
+    data: rows,
+    columns: studentColumns as ColumnDef<unknown, unknown>[],
+
+    // IMPORTANT: manual because server-side
+    manualPagination: true,
+    pageCount,
+
+    manualSorting: true,
+
+    // You can also set manualFiltering: true, (even if not using column filters)
+    manualFiltering: true,
+
+    state: {
+      sorting: tableState.sorting,
+      pagination: {
+        pageIndex: tableState.pageIndex,
+        pageSize: tableState.pageSize,
+      },
+    },
+
+    onSortingChange: tableState.setSorting,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater({
+              pageIndex: tableState.pageIndex,
+              pageSize: tableState.pageSize,
+            })
+          : updater;
+
+      tableState.setPageIndex(next.pageIndex);
+      tableState.setPageSize(next.pageSize);
+    },
+
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Toolbar
+        placeholder="Search by Name or Nomination List"
+        search={tableState.search}
+        setSearch={tableState.setSearch}
+        order={tableState.order}
+        setOrder={tableState.setOrder}
+        rangeValue={tableState.rangeValue}
+        setRangeValue={tableState.setRangeValue}
+        dateRange={tableState.dateRange}
+        setDateRange={tableState.setDateRange}
+        rangeOpen={tableState.rangeOpen}
+        setRangeOpen={tableState.setRangeOpen}
+        handleRangeChange={tableState.handleRangeChange}
+        isFetching={isFetching}
+        refetch={refetch}
+      />
+
+      <div className="rounded-md bg-surface border overflow-x-hidden">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((hg) => (
+              <TableRow key={hg.id}>
+                {hg.headers.map((h) => (
+                  <TableHead key={h.id} className="p-3">
+                    {h.isPlaceholder
+                      ? null
+                      : flexRender(h.column.columnDef.header, h.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {isPending ? (
+              <TableRow>
+                <TableCell
+                  colSpan={studentColumns.length}
+                  className="py-5 justify-center"
+                >
+                  <Spinner className="size-6 mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((r) => (
+                <TableRow key={r.id}>
+                  {r.getVisibleCells().map((c) => (
+                    <TableCell key={c.id} className="p-3">
+                      {flexRender(c.column.columnDef.cell, c.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={studentColumns.length}
                   className="py-5 text-center text-sm"
                 >
                   {status === "error" && (
@@ -171,6 +320,8 @@ export function NominationsTable({ id }: { id: string }) {
 }
 
 function Toolbar(props: {
+  placeholder?: string;
+
   search: string;
   setSearch: (v: string) => void;
 
@@ -192,6 +343,7 @@ function Toolbar(props: {
   refetch: () => void;
 }) {
   const {
+    placeholder = "Search by Name",
     setSearch,
     order,
     setOrder,
@@ -220,7 +372,7 @@ function Toolbar(props: {
               className="h-9.5"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder={`Search by Name`}
+              placeholder={placeholder}
             />
 
             <SelectInput

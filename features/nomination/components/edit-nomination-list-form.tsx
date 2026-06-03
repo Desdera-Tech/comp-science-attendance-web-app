@@ -1,6 +1,16 @@
 "use client";
 
 import Branding from "@/components/branding";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,11 +22,19 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { NominationFormValues, nominationSchema } from "@/lib/validation";
+import {
+  NominationListFormValues,
+  nominationListSchema,
+} from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "date-fns";
+import { Trash2Icon } from "lucide-react";
 import Link from "next/link";
+import router from "next/router";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useDeleteNominationList } from "../hooks/use-nomination";
 import { NominationListData } from "../types";
 
 export default function EditNominationListForm({
@@ -28,13 +46,32 @@ export default function EditNominationListForm({
 }) {
   const { id, title, description, nominations, createdAt } = list;
 
-  const { control } = useForm<NominationFormValues>({
-    resolver: zodResolver(nominationSchema),
+  const { control } = useForm<NominationListFormValues>({
+    resolver: zodResolver(nominationListSchema),
     defaultValues: {
       title,
       description: description || "",
     },
   });
+
+  const { mutateAsync: deleteList, isPending: isDeleting } =
+    useDeleteNominationList();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const onDelete = async () => {
+    if (isDeleting) return;
+    await deleteList(id, {
+      onSuccess: async (response) => {
+        const { error, message } = response;
+        if (error) {
+          toast.error(message);
+        } else {
+          router.push("/admin/nominations");
+          toast.success(message);
+        }
+      },
+    });
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -47,14 +84,14 @@ export default function EditNominationListForm({
             </CardDescription>
           </div>
           <div className="flex">
-            {/* <Button
-                  loading={isDeleting}
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
-                  <Trash2Icon className="text-destructive" />
-                </Button> */}
+            <Button
+              loading={isDeleting}
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2Icon className="text-destructive" />
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="px-0">
@@ -126,6 +163,23 @@ export default function EditNominationListForm({
           </form>
         </CardContent>
       </Card>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove this list, and all nominations associated with
+              it. This is irreversible, are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={onDelete}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

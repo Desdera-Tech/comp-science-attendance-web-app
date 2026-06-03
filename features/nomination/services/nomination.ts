@@ -1,8 +1,13 @@
 import { api } from "@/lib/api";
 import { exceptionHandler } from "@/lib/api/exception";
-import { NominationFormValues } from "@/lib/validation";
+import { NominationListFormValues } from "@/lib/validation";
 import { ApiEnvelope, PageResponse } from "@/types/api";
-import { NominationData, NominationListData, NominationQuery } from "../types";
+import {
+  NominatedByData,
+  NominationData,
+  NominationListData,
+  NominationQuery,
+} from "../types";
 
 function toQueryString(q: NominationQuery) {
   const params = new URLSearchParams();
@@ -56,14 +61,42 @@ export async function getNominations({
   }
 }
 
+export async function getStudentNominations({
+  q,
+}: {
+  q: NominationQuery;
+}): Promise<ApiEnvelope<PageResponse<NominatedByData>>> {
+  const qs = toQueryString(q);
+
+  try {
+    const res = await api.get<ApiEnvelope<PageResponse<NominatedByData>>>(
+      `/api/nomination/student?${qs}`,
+    );
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
+
 export async function addNominationList(
-  data: NominationFormValues,
+  data: NominationListFormValues,
 ): Promise<ApiEnvelope<NominationData>> {
   try {
     const res = await api.post<ApiEnvelope<NominationData>>(
       "/api/nomination",
       data,
     );
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
+
+export async function deleteNominationList(
+  id: string,
+): Promise<ApiEnvelope<void>> {
+  try {
+    const res = await api.delete<ApiEnvelope<void>>(`/api/nomination/${id}`);
     return res.data;
   } catch (err) {
     return exceptionHandler(err);

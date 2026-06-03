@@ -1,5 +1,5 @@
 import { NotFoundComp } from "@/components/not-found";
-import { NominationsTable } from "@/features/nomination/components/nominations-table";
+import { AdminNominationsTable } from "@/features/nomination/components/nominations-table";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -47,7 +47,7 @@ export default async function NominationsPage({
           </p>
         </div>
       </div>
-      <NominationsTable id={id} />
+      <AdminNominationsTable id={id} />
     </div>
   );
 }

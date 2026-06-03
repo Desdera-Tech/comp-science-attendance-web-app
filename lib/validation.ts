@@ -75,3 +75,10 @@ export const nominationSchema = z.object({
 });
 
 export type NominationFormValues = z.infer<typeof nominationSchema>;
+
+export const nominationListSchema = z.object({
+  title: requiredString,
+  description: z.string(),
+});
+
+export type NominationListFormValues = z.infer<typeof nominationListSchema>;

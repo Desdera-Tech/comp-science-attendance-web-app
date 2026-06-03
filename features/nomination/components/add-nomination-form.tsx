@@ -12,7 +12,10 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { NominationFormValues, nominationSchema } from "@/lib/validation";
+import {
+  NominationListFormValues,
+  nominationListSchema,
+} from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -29,15 +32,15 @@ export function AddNominationForm({
     reset,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<NominationFormValues>({
-    resolver: zodResolver(nominationSchema),
+  } = useForm<NominationListFormValues>({
+    resolver: zodResolver(nominationListSchema),
     defaultValues: {
       title: "",
       description: "",
     },
   });
 
-  const onSubmit = async (data: NominationFormValues) => {
+  const onSubmit = async (data: NominationListFormValues) => {
     await addNomination(data, {
       onSuccess: async (response) => {
         const { error, message } = response;

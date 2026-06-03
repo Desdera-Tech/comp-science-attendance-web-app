@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { ApiError } from "@/lib/errors/api-error";
 import { withErrorHandler } from "@/lib/errors/with-error-handler";
 import { prisma } from "@/lib/prisma";
-import { nominationSchema } from "@/lib/validation";
+import { nominationListSchema } from "@/lib/validation";
 import { Order } from "@/types";
 import { ApiEnvelope, PageResponse } from "@/types/api";
 import { getServerSession } from "next-auth";
@@ -91,7 +91,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   }
 
   const body = await req.json();
-  const { title, description } = nominationSchema.parse(body);
+  const { title, description } = nominationListSchema.parse(body);
 
   const nominationList = await prisma.nominationList.create({
     data: { title, description, createdByUserId: session.user.id },
