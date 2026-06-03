@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { BASE_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
   NominationListFormValues,
@@ -28,7 +29,7 @@ import {
 } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "date-fns";
-import { Trash2Icon } from "lucide-react";
+import { CheckIcon, ClipboardIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -55,9 +56,25 @@ export default function EditNominationListForm({
     },
   });
 
+  const [isCopied, setIsCopied] = useState(false);
+
   const { mutateAsync: deleteList, isPending: isDeleting } =
     useDeleteNominationList();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleCopy = async () => {
+    if (isCopied) return;
+
+    const message = `Please nominate your pick for this nomination list at\n${BASE_URL}/student/nominations/${id}`;
+
+    try {
+      await navigator.clipboard.writeText(message);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
 
   const onDelete = async () => {
     if (isDeleting) return;
@@ -84,10 +101,19 @@ export default function EditNominationListForm({
               Created on {formatDate(createdAt, "MMM dd, yyyy")}
             </CardDescription>
           </div>
-          <div className="flex">
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Copy link"
+              onClick={handleCopy}
+              disabled={isCopied}
+            >
+              {isCopied ? <CheckIcon /> : <ClipboardIcon />}
+            </Button>
             <Button
               loading={isDeleting}
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={() => setDeleteDialogOpen(true)}
             >
