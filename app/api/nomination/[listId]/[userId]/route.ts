@@ -1,4 +1,3 @@
-import { NominationData } from "@/features/nomination/types";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/auth/require-role";
 import { ApiError } from "@/lib/errors/api-error";
@@ -44,7 +43,7 @@ export const POST = withErrorHandler(
       throw new ApiError("You have already nominated for this list", 400);
     }
 
-    const nomination = await prisma.nomination.upsert({
+    await prisma.nomination.upsert({
       where: {
         nominationListId_nominatedById_nomineeId: {
           nominationListId: listId,
@@ -60,22 +59,8 @@ export const POST = withErrorHandler(
       update: {},
     });
 
-    const nominee = await prisma.user.findUnique({
-      where: { id: nomination.nominatedById },
-      select: { firstName: true, lastName: true },
-    });
-
-    const nominationCount = await prisma.nomination.count({
-      where: { nomineeId: userId, nominationListId: listId },
-    });
-
-    const data: ApiEnvelope<NominationData> = {
-      message: "Nomination created successfully",
-      data: {
-        ...nomination,
-        nomineeName: `${nominee?.firstName} ${nominee?.lastName}`,
-        nominations: nominationCount,
-      },
+    const data: ApiEnvelope<void> = {
+      message: "Student nominated successfully",
     };
 
     return NextResponse.json(data);

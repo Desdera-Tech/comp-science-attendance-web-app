@@ -1,6 +1,5 @@
 "use client";
 
-import Branding from "@/components/branding";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,49 +8,63 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import {
-  NominationListFormValues,
-  nominationListSchema,
-} from "@/lib/validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { CheckCircle2Icon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useAddNominationList } from "../hooks/use-nomination";
+import { useNominateStudent } from "../hooks/use-nomination";
+
+type StudentOption = {
+  label: string;
+  value: string;
+};
 
 export function NominateForm({
+  listId,
+  students,
   className,
   ...props
-}: React.ComponentProps<"div">) {
-  const { mutateAsync: addNomination } = useAddNominationList();
+}: React.ComponentProps<"div"> & {
+  listId: string;
+  students: StudentOption[];
+}) {
+  const [search, setSearch] = useState("");
+  const [userId, setUserId] = useState("");
 
-  const {
-    control,
-    reset,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm<NominationListFormValues>({
-    resolver: zodResolver(nominationListSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-    },
-  });
+  const { mutateAsync: nominateStudent, isPending } = useNominateStudent();
 
-  const onSubmit = async (data: NominationListFormValues) => {
-    await addNomination(data, {
-      onSuccess: async (response) => {
-        const { error, message } = response;
-        if (error) {
-          toast.error(message);
-        } else {
-          reset();
-          toast.success(message);
-        }
+  const selectedStudent = students.find((student) => student.value === userId);
+
+  const filteredStudents = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return students;
+    return students.filter((student) =>
+      student.label.toLowerCase().includes(query),
+    );
+  }, [search, students]);
+
+  const onSubmit = async () => {
+    if (!userId) {
+      toast.error("Please select a student");
+      return;
+    }
+
+    await nominateStudent(
+      { listId, userId },
+      {
+        onSuccess: async (response) => {
+          const { error, message } = response;
+          if (error) {
+            toast.error(message);
+          } else {
+            toast.success(message);
+            setUserId("");
+            setSearch("");
+          }
+        },
       },
-    });
+    );
   };
 
   return (
@@ -59,70 +72,81 @@ export function NominateForm({
       <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>Nominate a Student</CardTitle>
-          <CardDescription>
-            Create a new nomination list and have students nominate others for
-            awards.
-          </CardDescription>
+          <CardDescription>Nominate a student for an award.</CardDescription>
         </CardHeader>
-        <CardContent className="px-0">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FieldGroup>
-              <div className="flex flex-col gap-7 px-6">
-                <Controller
-                  control={control}
-                  name="title"
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState,
-                  }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <Input
-                        id="title"
-                        type="text"
-                        label="Title"
-                        placeholder="Enter the list title"
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        error={fieldState.error}
-                        aria-invalid={fieldState.invalid}
+        <CardContent className="space-y-4 px-6">
+          <Input
+            placeholder="Search for a student to nominate"
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          {userId && (
+            <Student
+              key={selectedStudent?.value || ""}
+              label={selectedStudent?.label || ""}
+              value={selectedStudent?.value || ""}
+            />
+          )}
+
+          <div className="bg-background rounded-lg">
+            <div className="overflow-y-auto p-4" style={{ height: 500 }}>
+              <div className="space-y-4">
+                {filteredStudents.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No students found matching &apos;{search}&apos;
+                  </p>
+                ) : (
+                  filteredStudents.map((student) => {
+                    const isSelected = userId === student.value;
+
+                    return (
+                      <Student
+                        key={student.value}
+                        label={student.label}
+                        value={student.value}
+                        isSelected={isSelected}
+                        onSelect={() => setUserId(student.value)}
                       />
-                    </Field>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="description"
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState,
-                  }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <Input
-                        id="description"
-                        type="text"
-                        label="Description"
-                        placeholder="Enter an optional description for the nomination list"
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        error={fieldState.error}
-                        aria-invalid={fieldState.invalid}
-                      />
-                    </Field>
-                  )}
-                />
-                <Field className="col-span-full">
-                  <Button loading={isSubmitting} type="submit">
-                    Create
-                  </Button>
-                </Field>
+                    );
+                  })
+                )}
               </div>
-              <Branding />
-            </FieldGroup>
-          </form>
+            </div>
+          </div>
+          <Button
+            loading={isPending}
+            className="w-full"
+            type="submit"
+            onClick={onSubmit}
+          >
+            Nominate
+          </Button>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+export default function Student({
+  label,
+  value,
+  isSelected,
+  onSelect,
+}: {
+  label: string;
+  value: string;
+  isSelected?: boolean;
+  onSelect?: (value: string) => void;
+}) {
+  return (
+    <div
+      onClick={() => onSelect && onSelect(value)}
+      className={cn(
+        "flex items-center justify-between bg-background px-3 py-2 cursor-pointer border rounded-md transition-colors text-sm font-medium",
+      )}
+    >
+      {label}
+      {isSelected && <CheckCircle2Icon className="size-4" />}
     </div>
   );
 }

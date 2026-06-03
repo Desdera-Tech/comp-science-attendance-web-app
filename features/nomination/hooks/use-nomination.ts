@@ -2,10 +2,12 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   addNominationList,
+  deleteNomination,
   deleteNominationList,
   getNominations,
   getNominationsList,
   getStudentNominations,
+  nominateStudent,
 } from "../services/nomination";
 import { NominationQuery } from "../types";
 
@@ -66,6 +68,30 @@ export function useAddNominationList() {
 export function useDeleteNominationList() {
   return useMutation({
     mutationFn: deleteNominationList,
+    onError(error) {
+      console.error(error);
+      toast.error(
+        "An error occurred while removing the nomination. Please try again.",
+      );
+    },
+  });
+}
+
+export function useNominateStudent() {
+  return useMutation({
+    mutationFn: nominateStudent,
+    onError(error) {
+      console.error(error);
+      toast.error(
+        "An error occurred while nominating the student. Please try again.",
+      );
+    },
+  });
+}
+
+export function useDeleteNomination() {
+  return useMutation({
+    mutationFn: deleteNomination,
     onError(error) {
       console.error(error);
       toast.error(

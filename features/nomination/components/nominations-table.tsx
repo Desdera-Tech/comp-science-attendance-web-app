@@ -5,6 +5,13 @@ import FilterDropdown from "@/components/table/filter-dropdown";
 import TablePagination from "@/components/table/table-pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SelectInput } from "@/components/ui/select-input";
 import { Spinner } from "@/components/ui/spinner";
@@ -28,29 +35,20 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
-import { RotateCwIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNominations, useStudentNominations } from "../hooks/use-nomination";
+import { MoreVertical, RotateCwIcon, Trash2Icon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import {
+  useDeleteNomination,
+  useNominations,
+  useStudentNominations,
+} from "../hooks/use-nomination";
 import { useNominationsTableState } from "../hooks/use-table-state";
 import { NominatedByData, NominationData } from "../types";
 
 const adminColumns: ColumnDef<NominationData>[] = [
   { accessorKey: "nomineeName", header: "Name" },
   { accessorKey: "nominations", header: "Nominations" },
-];
-
-const studentColumns: ColumnDef<NominatedByData>[] = [
-  { accessorKey: "nominationListTitle", header: "Title" },
-  { accessorKey: "nomineeName", header: "Name" },
-  {
-    accessorKey: "createdAt",
-    header: "Entered At",
-    cell: ({ row }) => {
-      const { createdAt } = row.original;
-
-      return formatDate(createdAt, "dd MMMM yyyy, hh:mm:aa");
-    },
-  },
 ];
 
 export function AdminNominationsTable({ id }: { id: string }) {
@@ -201,6 +199,78 @@ export function StudentNominationsTable() {
   const total = data?.total || 0;
   const pageCount = data?.totalPages || 0;
   const rows = data?.items || [];
+
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const { mutateAsync: deleteNomination } = useDeleteNomination();
+
+  const studentColumns = useMemo<ColumnDef<NominatedByData>[]>(
+    () => [
+      { accessorKey: "nominationListTitle", header: "Title" },
+      { accessorKey: "nomineeName", header: "Name" },
+      {
+        accessorKey: "createdAt",
+        header: "Entered At",
+        cell: ({ row }) => {
+          const { createdAt } = row.original;
+
+          return formatDate(createdAt, "dd MMMM yyyy, hh:mm:aa");
+        },
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          const { nominationListId, nomineeId } = row.original;
+
+          return (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuItem
+                    className="text-destructive cursor-pointer"
+                    onClick={async () => {
+                      setLoadingId(nomineeId);
+                      try {
+                        await deleteNomination(
+                          {
+                            listId: nominationListId,
+                            userId: nomineeId,
+                          },
+                          {
+                            onSuccess: async (response) => {
+                              const { error, message } = response;
+                              if (error) {
+                                toast.error(message);
+                              } else {
+                                toast.success(message);
+                              }
+                            },
+                          },
+                        );
+                      } finally {
+                        setLoadingId(null);
+                      }
+                    }}
+                    disabled={loadingId === nomineeId}
+                  >
+                    <Trash2Icon className="text-destructive" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          );
+        },
+      },
+    ],
+    [deleteNomination, loadingId],
+  );
 
   const table = useReactTable({
     data: rows,

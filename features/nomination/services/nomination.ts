@@ -102,3 +102,37 @@ export async function deleteNominationList(
     return exceptionHandler(err);
   }
 }
+
+export async function nominateStudent({
+  listId,
+  userId,
+}: {
+  listId: string;
+  userId: string;
+}): Promise<ApiEnvelope<void>> {
+  try {
+    const res = await api.post<ApiEnvelope<void>>(
+      `/api/nomination/${listId}/${userId}`,
+    );
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
+
+export async function deleteNomination({
+  listId,
+  userId,
+}: {
+  listId: string;
+  userId: string;
+}): Promise<ApiEnvelope<void>> {
+  try {
+    const res = await api.delete<ApiEnvelope<void>>(
+      `/api/nomination/${listId}/${userId}`,
+    );
+    return res.data;
+  } catch (err) {
+    return exceptionHandler(err);
+  }
+}
