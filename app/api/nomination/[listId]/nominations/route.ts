@@ -1,4 +1,5 @@
 import { NominationData } from "@/features/nomination/types";
+import { Prisma } from "@/generated/prisma/client";
 import { getPaginationParams } from "@/lib/api/pagination";
 import { requireRole } from "@/lib/auth/require-role";
 import { ApiError } from "@/lib/errors/api-error";
@@ -26,83 +27,83 @@ export const GET = withErrorHandler(
 
     const nominationList = await prisma.nominationList.findUnique({
       where: { id: listId },
+      select: { title: true },
     });
 
     if (!nominationList) {
       throw new ApiError("Nomination list not found", 404);
     }
 
-    const [nominations, total] = await Promise.all([
-      prisma.nomination.findMany({
-        where: {
-          nominationListId: listId,
-          ...(search && {
-            nominee: {
-              firstName: { contains: search, mode: "insensitive" },
-              lastName: { contains: search, mode: "insensitive" },
-            },
-          }),
-          ...((from || to) && {
-            createdAt: {
-              ...(from && { gte: new Date(from) }),
-              ...(to && { lte: new Date(to) }),
-            },
-          }),
+    const where: Prisma.NominationWhereInput = {
+      nominationListId: listId,
+      ...(search && {
+        nominee: {
+          OR: [
+            { firstName: { contains: search, mode: "insensitive" } },
+            { lastName: { contains: search, mode: "insensitive" } },
+          ],
+        },
+      }),
+      ...((from || to) && {
+        createdAt: {
+          ...(from && { gte: new Date(from) }),
+          ...(to && { lte: new Date(to) }),
+        },
+      }),
+    };
+
+    const [grouped, total] = await Promise.all([
+      prisma.nomination.groupBy({
+        by: ["nomineeId"],
+        where,
+        _count: {
+          nomineeId: true,
+        },
+        orderBy: {
+          _count: {
+            nomineeId: order === "DESC" ? "desc" : "asc",
+          },
         },
         skip,
         take: limit,
-        orderBy: { createdAt: order === "DESC" ? "desc" : "asc" },
-        include: {
-          nominationList: {
-            select: {
-              title: true,
-            },
-          },
-          nominee: {
-            select: {
-              firstName: true,
-              lastName: true,
-              _count: {
-                select: {
-                  nominationsReceived: true,
-                },
-              },
-            },
-          },
-        },
       }),
-      prisma.nomination.count({
-        where: {
-          nominationListId: listId,
-          ...(search && {
-            nominee: {
-              firstName: { contains: search, mode: "insensitive" },
-              lastName: { contains: search, mode: "insensitive" },
-            },
-          }),
-          ...((from || to) && {
-            createdAt: {
-              ...(from && { gte: new Date(from) }),
-              ...(to && { lte: new Date(to) }),
-            },
-          }),
-        },
+      prisma.nomination.groupBy({
+        by: ["nomineeId"],
+        where,
       }),
     ]);
+
+    const nominees = await prisma.user.findMany({
+      where: {
+        id: {
+          in: grouped.map((g) => g.nomineeId),
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
 
     const data: ApiEnvelope<PageResponse<NominationData>> = {
       message: "Nominations fetched successfully",
       data: {
-        items: nominations.map((nomination) => ({
-          ...nomination,
-          nominationListTitle: nomination.nominationList.title,
-          nomineeName: `${nomination.nominee.firstName} ${nomination.nominee.lastName}`,
-          nominations: nomination.nominee._count.nominationsReceived,
-        })),
+        items: grouped.map((group) => {
+          const nominee = nominees.find((n) => n.id === group.nomineeId);
+
+          return {
+            nominationListId: listId,
+            nominationListTitle: nominationList.title,
+            nomineeId: group.nomineeId,
+            nomineeName: `${nominee?.firstName} ${nominee?.lastName}`,
+            nominations: group._count.nomineeId,
+          };
+        }),
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: total.length,
+        totalPages: Math.ceil(total.length / limit),
       },
     };
 

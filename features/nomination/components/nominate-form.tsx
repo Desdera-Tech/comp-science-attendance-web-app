@@ -89,7 +89,7 @@ export function NominateForm({
           )}
 
           <div className="bg-background rounded-lg">
-            <div className="overflow-y-auto p-4" style={{ height: 500 }}>
+            <div className="overflow-y-auto p-4" style={{ maxHeight: 500 }}>
               <div className="space-y-4">
                 {filteredStudents.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">

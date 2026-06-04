@@ -13,6 +13,7 @@ export type Analytics = {
   admins: number;
   students: number;
   records: number;
+  nominations: number;
 };
 
 export type AdminsPage = {

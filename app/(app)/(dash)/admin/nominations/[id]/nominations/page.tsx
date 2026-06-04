@@ -12,12 +12,8 @@ export default async function NominationsPage({
 
   const list = await prisma.nominationList.findUnique({
     where: { id },
-    include: {
-      _count: {
-        select: {
-          nominations: true,
-        },
-      },
+    select: {
+      title: true,
     },
   });
 
