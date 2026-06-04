@@ -12,13 +12,6 @@ export default async function NominationListPage({
 
   const list = await prisma.nominationList.findUnique({
     where: { id },
-    include: {
-      _count: {
-        select: {
-          nominations: true,
-        },
-      },
-    },
   });
 
   if (!list) {
@@ -31,9 +24,16 @@ export default async function NominationListPage({
     );
   }
 
+  const nominatedStudents = await prisma.nomination.groupBy({
+    by: ["nomineeId"],
+    where: {
+      nominationListId: id,
+    },
+  });
+
   const data: NominationListData = {
     ...list,
-    nominations: list._count.nominations,
+    nominations: nominatedStudents.length,
   };
 
   return (

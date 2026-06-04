@@ -9,8 +9,8 @@ export function AdminAnalytics() {
 
   if (isPending) {
     return (
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, index) => (
           <AnalyticCardSkeleton key={index} />
         ))}
       </div>
@@ -20,12 +20,14 @@ export function AdminAnalytics() {
   const students = formatWholeNumber(data?.students || 0);
   const admins = formatWholeNumber(data?.admins || 0);
   const records = formatWholeNumber(data?.records || 0);
+  const nominations = formatWholeNumber(data?.nominations || 0);
 
   return (
-    <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       <AnalyticCard title="Students" value={students} />
       <AnalyticCard title="Admins" value={admins} />
       <AnalyticCard title="Records" value={records} />
+      <AnalyticCard title="Nominations" value={nominations} />
     </div>
   );
 }

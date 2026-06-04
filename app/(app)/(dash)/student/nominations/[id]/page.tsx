@@ -35,8 +35,11 @@ export default async function NominatePage({
 
   return (
     <div className="flex flex-col overflow-hidden gap-6">
-      <div className="flex flex-wrap gap-2 items-center justify-between">
+      <div className="space-y-1">
         <h1 className="text-xl md:text-2xl font-bold">{list.title}</h1>
+        <p className="text-sm font-medium text-muted-foreground">
+          {list.description}
+        </p>
       </div>
       <div className="w-full lg:w-1/2 xl:w-1/3">
         <NominateForm listId={id} students={formattedStudents} />
